@@ -2,6 +2,7 @@
   taps = [
     "anomalyco/tap"
     "atomicjar/tap"
+    "dicklesworthstone/tap"
     "farion1231/ccswitch"
     "go-musicfox/go-musicfox"
     "laishulu/homebrew"
@@ -19,6 +20,7 @@
     "colima"
     "composer"
     "delve"
+    "dicklesworthstone/tap/dcg"
     "docker"
     "docker-buildx"
     "docker-compose"

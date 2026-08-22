@@ -20,6 +20,10 @@ in
 
     globalConfig = {
       inherit tools;
+      settings.minimum_release_age = "0";
     };
   };
+
+  # 首次接管时直接替换已有 mise 配置，不创建备份
+  xdg.configFile."mise/config.toml".force = true;
 }

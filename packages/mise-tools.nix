@@ -21,10 +21,10 @@
   "npm:@mermaid-js/mermaid-cli" = "latest";
   "npm:@oh-my-pi/pi-coding-agent" = "latest";
   "npm:@openai/codex" = "latest";
+  "npm:context-mode" = "latest";
   "npm:cross-env" = "latest";
   "npm:get-shit-done-cc" = "latest";
   "npm:picgo" = "latest";
   "npm:skills" = "latest";
-  "npm:vercel" = "latest";
   "pipx:serena-agent" = "latest";
 }

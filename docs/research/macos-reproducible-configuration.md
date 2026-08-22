@@ -118,7 +118,7 @@ docs/
 
 `latest`、`lts` 和 `22` 都是动态 selector。`lts` 由具体 backend 的 alias 提供，不是每个工具都具有相同语义；例如 Node 的 `lts` 映射会随 mise/backend 更新。希望保持某个 LTS 代际时，写 `node = "24"` 比 `node = "lts"` 更稳定；希望自动跨 LTS 代际时才使用 `lts`。[mise aliases](https://mise.jdx.dev/dev-tools/aliases.html)；[Node backend 源码](https://github.com/jdx/mise/blob/main/src/plugins/core/node.rs)（访问于 2026-08-21）
 
-本实现接受 ADR 0004：macOS 使用语义 selector，不设置 `minimum_release_age`，也不提交全局 `mise.lock`。恢复时接受 selector 随时间解析到新版本，Home Manager 只生成配置，安装和升级由用户显式执行：
+本实现接受 ADR 0004：macOS 以当前全局 mise 配置为基准，并显式保留 `pnpm`、`prettier` 与 `npm:@oh-my-pi/pi-coding-agent` 三项工具。清单使用语义 selector，保留 `minimum_release_age = "0"`，但不提交全局 `mise.lock`。恢复时接受 selector 随时间解析到新版本，Home Manager 只生成配置，安装和升级由用户显式执行：
 
 ```toml
 [tools]
@@ -127,9 +127,12 @@ python = "3.13"
 uv = "latest"
 "npm:@openai/codex" = "latest"
 "pipx:serena-agent" = "latest"
+
+[settings]
+minimum_release_age = "0"
 ```
 
-mise 也提供全局 lock 和 `minimum_release_age`，但它们属于本轮明确拒绝的替代方案，不进入 macOS 配置。日常先使用 `mise outdated` 审阅，再由用户显式执行 `mise install` 或 `mise upgrade`。[mise use](https://mise.jdx.dev/cli/use.html)；[mise upgrade](https://mise.jdx.dev/cli/upgrade.html)；[mise lock 官方文档](https://mise.jdx.dev/dev-tools/mise-lock.html)（访问于 2026-08-21）
+mise 也提供全局 lock，但本实现只保留当前配置中的 `minimum_release_age = "0"`，不启用或提交 lock。日常先使用 `mise outdated` 审阅，再由用户显式执行 `mise install` 或 `mise upgrade`。[mise use](https://mise.jdx.dev/cli/use.html)；[mise upgrade](https://mise.jdx.dev/cli/upgrade.html)；[mise lock 官方文档](https://mise.jdx.dev/dev-tools/mise-lock.html)（访问于 2026-08-21）
 
 ### 3.2 npm 与 Python CLI
 
@@ -378,7 +381,7 @@ nix eval --raw \
 2. 将 Home Manager 配置拆到独立 module，由主机配置注入用户
 3. 将 Homebrew taps/brews/casks 拆成 macOS 专用清单文件
 4. Home Manager 只生成 mise 配置；移除 Darwin activation 中自动执行 `mise install`
-5. macOS 使用 mise 语义 selector，不设置 `minimum_release_age`，也不提交全局 `mise.lock`
+5. macOS 使用当前全局 mise 配置加显式保留的 `pnpm`、`prettier` 与 `npm:@oh-my-pi/pi-coding-agent`，采用语义 selector，保留 `minimum_release_age = "0"`，但不提交全局 `mise.lock`
 6. 不新增 Bun 官方 Flake input；若 Nix 管 Bun，使用当前 nixpkgs 的 `pkgs.bun`
 7. tmux 保留无自动刷新周期的 `git-repo` external；Rime 作为独立 Git 仓库按路径划分所有权
 8. Rime CLI 仅作为显式人工维护工具，不进入 activation
