@@ -79,7 +79,6 @@
     "localsend"
     "mark-text"
     "obsidian"
-    "orbstack"
     "raycast"
     "redis-insight"
     "snipaste"
