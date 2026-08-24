@@ -5,7 +5,10 @@
     ./system-defaults.nix
   ];
 
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    enableGlobalCompInit = false;
+  };
 
   environment.systemPackages = [
     (pkgs.callPackage ../../packages/oh-my-rime-cli { })
