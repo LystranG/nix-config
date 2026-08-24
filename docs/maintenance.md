@@ -12,7 +12,15 @@
 
 ## mise
 
-先审阅 `mise outdated`，再由用户显式执行 `mise upgrade` 或 `mise install`；Home Manager 只生成全局配置
+全局配置由 chezmoi 管理。可以直接使用 `mise use -g`，安装和修改完成后检查并写回 dotfiles：
+
+```bash
+mise use -g <tool>@<version>
+chezmoi diff
+chezmoi re-add ~/.config/mise/config.toml
+```
+
+新设备或配置恢复后，由用户显式执行 `mise install`；日常升级先审阅 `mise outdated`，再执行 `mise upgrade`
 
 ## Rime
 

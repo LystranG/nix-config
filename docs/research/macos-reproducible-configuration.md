@@ -15,7 +15,7 @@
 | Nix 安装、daemon、`nix.conf` | Determinate Nix | nix-darwin 通过 Determinate module 做兼容，不并行管理 Nix |
 | macOS defaults、系统服务、Homebrew 清单 | nix-darwin | Homebrew module 只协调已有 Homebrew，不安装 Homebrew |
 | 用户级 Nix 配置 | Home Manager | 作为 nix-darwin module 集成；普通 Linux 可 standalone |
-| 开发运行时和全局 CLI | mise | macOS 使用语义版本选择器，不提交全局 `mise.lock` |
+| 开发运行时和全局 CLI | mise；配置文件由 chezmoi 管理 | macOS 使用语义版本选择器，不提交全局 `mise.lock`；`mise use -g` 后需 `chezmoi re-add` |
 | Bun 本体 | `pkgs.bun` 或 mise 二选一 | Bun 官方 Flake 不是可安装 package Flake |
 | npm/pipx CLI | mise | `npm:<package>`、`pipx:<package>`；Bun 可仅作为 npm backend 的安装器 |
 | 用户 dotfiles、自定义覆写 | chezmoi | 不与 Nix/Home Manager 同时管理同一目标文件 |
@@ -77,7 +77,6 @@ hosts/
   <linux-host>/default.nix
 modules/
   common/
-    mise.nix
     chezmoi.nix
     repositories.nix
   darwin/
@@ -95,7 +94,6 @@ packages/
     taps.nix
     brews.nix
     casks.nix
-  mise-tools.nix
 docs/
   bootstrap.md
   manual-apps.md
@@ -118,7 +116,7 @@ docs/
 
 `latest`、`lts` 和 `22` 都是动态 selector。`lts` 由具体 backend 的 alias 提供，不是每个工具都具有相同语义；例如 Node 的 `lts` 映射会随 mise/backend 更新。希望保持某个 LTS 代际时，写 `node = "24"` 比 `node = "lts"` 更稳定；希望自动跨 LTS 代际时才使用 `lts`。[mise aliases](https://mise.jdx.dev/dev-tools/aliases.html)；[Node backend 源码](https://github.com/jdx/mise/blob/main/src/plugins/core/node.rs)（访问于 2026-08-21）
 
-本实现接受 ADR 0004：macOS 以当前全局 mise 配置为基准，并显式保留 `pnpm`、`prettier` 与 `npm:@oh-my-pi/pi-coding-agent` 三项工具。清单使用语义 selector，保留 `minimum_release_age = "0"`，但不提交全局 `mise.lock`。恢复时接受 selector 随时间解析到新版本，Home Manager 只生成配置，安装和升级由用户显式执行：
+本实现接受 ADR 0004：macOS 的 mise 全局配置由 chezmoi 管理，工具安装和 `mise use -g` 的写入由 mise 执行。配置使用语义 selector，保留 `minimum_release_age = "0"`，但不提交全局 `mise.lock`。恢复时先执行 `chezmoi apply`，再由用户显式执行 `mise install`；`mise use -g` 后使用 `chezmoi re-add ~/.config/mise/config.toml` 保存变更：
 
 ```toml
 [tools]
@@ -132,7 +130,7 @@ uv = "latest"
 minimum_release_age = "0"
 ```
 
-mise 也提供全局 lock，但本实现只保留当前配置中的 `minimum_release_age = "0"`，不启用或提交 lock。日常先使用 `mise outdated` 审阅，再由用户显式执行 `mise install` 或 `mise upgrade`。[mise use](https://mise.jdx.dev/cli/use.html)；[mise upgrade](https://mise.jdx.dev/cli/upgrade.html)；[mise lock 官方文档](https://mise.jdx.dev/dev-tools/mise-lock.html)（访问于 2026-08-21）
+mise 也提供全局 lock，但本实现不启用或提交 lock。日常先使用 `mise outdated` 审阅，再由用户显式执行 `mise upgrade`；新增或修改全局工具使用 `mise use -g`，确认差异后执行 `chezmoi re-add ~/.config/mise/config.toml`。[mise use](https://mise.jdx.dev/cli/use.html)；[mise upgrade](https://mise.jdx.dev/cli/upgrade.html)；[mise lock 官方文档](https://mise.jdx.dev/dev-tools/mise-lock.html)（访问于 2026-08-21）
 
 ### 3.2 npm 与 Python CLI
 
@@ -151,13 +149,13 @@ mise 当前可以直接管理 npm CLI：
 
 需要明确限制：mise lock 对 npm、cargo、pipx 当前只锁直接工具版本，不锁完整 asset URL/checksum 和全部传递依赖，不能宣称它实现了完整供应链复现。[mise lock Backend Support](https://mise.jdx.dev/dev-tools/mise-lock.html#backend-support)（访问于 2026-08-21）
 
-### 3.3 不应在 nix-darwin activation 中执行 `mise install`
+### 3.3 不应在 nix-darwin 或 chezmoi activation 中执行 `mise install`
 
 `mise install` 会联网、下载并修改用户目录。把它放进 nix-darwin activation 会使系统激活同时承担滚动工具安装，失败面和漂移都会扩大。更清晰的流程是：
 
-1. nix-darwin/Home Manager 只生成 mise 配置和 lock
-2. bootstrap 的显式第二阶段执行 `mise install`
-3. 日常更新使用单独的 review/update 命令
+1. nix-darwin 只管理系统配置和 Homebrew，chezmoi 管理 mise 全局配置
+2. bootstrap 的显式第二阶段执行 `chezmoi apply`，第三阶段执行 `mise install`
+3. 日常更新使用 `mise use -g`、`mise outdated` 和 `mise upgrade`，并将全局配置变更 `chezmoi re-add` 回源仓库
 
 这是根据 mise 命令的写状态行为与 nix-darwin activation 幂等目标得出的设计判断。[mise install](https://mise.jdx.dev/cli/install.html)；[nix-darwin Homebrew activation 对幂等性的说明](https://nix-darwin.github.io/nix-darwin/manual/index.html#opt-homebrew.onActivation.autoUpdate)（访问于 2026-08-21）
 
@@ -380,8 +378,8 @@ nix eval --raw \
 1. 保留 Determinate module 与 `determinateNix.enable = true`
 2. 将 Home Manager 配置拆到独立 module，由主机配置注入用户
 3. 将 Homebrew taps/brews/casks 拆成 macOS 专用清单文件
-4. Home Manager 只生成 mise 配置；移除 Darwin activation 中自动执行 `mise install`
-5. macOS 使用当前全局 mise 配置加显式保留的 `pnpm`、`prettier` 与 `npm:@oh-my-pi/pi-coding-agent`，采用语义 selector，保留 `minimum_release_age = "0"`，但不提交全局 `mise.lock`
+4. nix-darwin 只管理系统配置和 Homebrew；chezmoi 管理 mise 全局配置，移除 Home Manager 的 mise 配置
+5. macOS 使用 chezmoi 保存的 mise 配置与语义 selector，保留 `minimum_release_age = "0"`，但不提交全局 `mise.lock`
 6. 不新增 Bun 官方 Flake input；若 Nix 管 Bun，使用当前 nixpkgs 的 `pkgs.bun`
 7. tmux 保留无自动刷新周期的 `git-repo` external；Rime 作为独立 Git 仓库按路径划分所有权
 8. Rime CLI 仅作为显式人工维护工具，不进入 activation

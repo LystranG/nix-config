@@ -20,7 +20,7 @@ nix flake check --no-update-lock-file --show-trace
 nix build .#darwinConfigurations.personal-mac.system --no-update-lock-file --show-trace
 ```
 
-确认构建结果后，由用户单独决定何时执行首次系统切换、chezmoi apply 和 `mise install`
+确认构建结果后，由用户单独决定何时执行首次系统切换、`chezmoi apply` 和 `mise install`。先应用系统配置，再应用 chezmoi，使 mise 全局配置落盘，最后由 mise 安装工具
 
 ## 上游配置仓库
 
@@ -32,4 +32,3 @@ git clone https://github.com/gpakosz/.tmux.git ~/.tmux
 ```
 
 若目标目录已经存在但不是预期仓库，先人工备份和核对，不覆盖现有内容
-
