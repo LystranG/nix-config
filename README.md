@@ -26,7 +26,9 @@ sudo -H nix run nix-darwin -- switch \
   --flake '/Users/lystran/.flake#personal-mac'
 ```
 
-脚本只应用 Nix/nix-darwin 系统配置，不会自动执行 `chezmoi apply`、`mise install`、`mise upgrade` 或 Rime/tmux 远程更新。
+脚本先应用 Nix/nix-darwin 系统配置；同步成功后，会分别询问是否更新 Rime 和 tmux
+上游仓库。输入 `y` 才会执行操作，其他输入都会跳过。脚本不会自动执行
+`chezmoi apply`、`mise install` 或 `mise upgrade`。
 
 ## 常用校验
 
@@ -128,7 +130,14 @@ chezmoi apply
 
 ### Rime 与 tmux
 
-这两个目录是独立的上游 Git 仓库，不由 nix-darwin 自动 clone 或更新。
+这两个目录是独立的上游 Git 仓库。运行 `./scripts/apply-darwin.sh` 并在提示时输入 `y`
+后，脚本会执行以下操作：
+
+- 目录不存在时 clone 对应仓库
+- 目录存在且是干净的 Git 仓库时执行 `git pull --ff-only`
+- 目录有本地修改、不是 Git 仓库或没有 `origin` 时跳过并提示
+
+脚本不会自动 reset、stash、覆盖本地修改或解决 Git 冲突。
 
 ```bash
 git -C ~/Library/Rime status --short
@@ -138,7 +147,7 @@ git -C ~/Library/Rime pull --ff-only origin main
 git -C ~/.tmux pull --ff-only origin master
 ```
 
-只有在目录不存在时才 clone；已有本地修改时不要自动 reset、stash 或覆盖。
+也可以手动执行上述命令。已有本地修改时不要自动 reset、stash 或覆盖。
 
 ## Git 工作流
 
@@ -174,5 +183,5 @@ git push
 - `darwin-rebuild switch`：应用系统设置、Homebrew 清单、系统级 Nix 配置
 - `chezmoi apply`：应用用户 dotfiles 和 mise 配置
 - `mise use -g` / `mise install`：修改或安装用户级开发工具
-- Rime/tmux `git pull --ff-only`：人工维护上游仓库
+- `apply-darwin.sh` 中的交互式 Rime/tmux `git pull --ff-only`：可选的上游仓库维护
 - Mac App Store、Bitwarden、官网安装的软件：人工登录和更新
