@@ -56,6 +56,7 @@
     "tmux"
     "trash-cli"
     "tree"
+    "rtk"
     "utftex"
     "wget"
     "yq"
