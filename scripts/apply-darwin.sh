@@ -58,6 +58,46 @@ update_repository() {
   fi
 }
 
+update_wanxiang_model() {
+  local rime_path="$1"
+  local model_url='https://github.com/amzxyz/RIME-LMDG/releases/download/LTS/wanxiang-lts-zh-hans.gram'
+  local model_path="${rime_path}/wanxiang-lts-zh-hans.gram"
+  local temp_path
+  local answer
+
+  printf '\n是否更新万象模型？[y/N] '
+  read -r answer
+  case "${answer}" in
+    y|Y|yes|YES)
+      ;;
+    *)
+      printf '已跳过万象模型更新\n'
+      return 0
+      ;;
+  esac
+
+  if [[ ! -d "${rime_path}" ]]; then
+    printf '跳过万象模型更新：Rime 目录不存在：%s\n' "${rime_path}" >&2
+    return 0
+  fi
+
+  temp_path=$(mktemp "${rime_path}/.wanxiang-lts-zh-hans.gram.XXXXXX")
+  if curl \
+    --fail \
+    --location \
+    --show-error \
+    --silent \
+    --retry 3 \
+    --output "${temp_path}" \
+    "${model_url}"; then
+    mv -- "${temp_path}" "${model_path}"
+    printf '万象模型更新完成：%s\n' "${model_path}"
+  else
+    rm -f -- "${temp_path}"
+    printf '万象模型下载失败，未修改现有文件\n' >&2
+  fi
+}
+
 if ! command -v nix >/dev/null 2>&1; then
   printf '%s\n' '错误：未找到 nix，请先安装 Determinate Nix' >&2
   exit 1
@@ -83,6 +123,7 @@ update_repository \
   "${HOME}/Library/Rime" \
   'https://github.com/Mintimate/oh-my-rime.git' \
   'main'
+update_wanxiang_model "${HOME}/Library/Rime"
 update_repository \
   'tmux' \
   "${HOME}/.tmux" \

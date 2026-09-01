@@ -4,7 +4,10 @@
     "atomicjar/tap"
     "dicklesworthstone/tap"
     "laishulu/homebrew"
-    "theboredteam/boring-notch"
+    {
+      name = "theboredteam/boring-notch";
+      trusted = true;
+    }
   ];
 
   brews = [

@@ -139,6 +139,11 @@ chezmoi apply
 
 脚本不会自动 reset、stash、覆盖本地修改或解决 Git 冲突。
 
+Rime 更新提示之后，脚本还会询问是否更新万象模型。确认后会从
+`https://github.com/amzxyz/RIME-LMDG/releases/download/LTS/wanxiang-lts-zh-hans.gram`
+下载并更新 `~/Library/Rime/wanxiang-lts-zh-hans.gram`。下载完成后才会替换旧文件；
+Rime 目录不存在或下载失败时不会修改已有模型。
+
 ```bash
 git -C ~/Library/Rime status --short
 git -C ~/.tmux status --short
