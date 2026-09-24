@@ -39,6 +39,7 @@
     "jdtls"
     "jq"
     "julia"
+    "thrift"
     "just"
     "k9s"
     "knot"
