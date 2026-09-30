@@ -53,6 +53,7 @@
     "pandoc"
     "pre-commit"
     "rust"
+    "rustup"
     "syncthing"
     "shellcheck"
     "tectonic"
