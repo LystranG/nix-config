@@ -4,10 +4,6 @@
     "atomicjar/tap"
     "dicklesworthstone/tap"
     "laishulu/homebrew"
-    {
-      name = "theboredteam/boring-notch";
-      trusted = true;
-    }
   ];
 
   brews = [
@@ -71,7 +67,6 @@
 
   casks = [
     "appcleaner"
-    "boring-notch"
     "cryptomator"
     "font-hanamin"
     "font-lxgw-wenkai"
