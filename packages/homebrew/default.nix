@@ -83,7 +83,6 @@
     "squirrel-app"
     "syncthing-app"
     "tabby"
-    "thaw"
     "thunderbird"
   ];
 }
