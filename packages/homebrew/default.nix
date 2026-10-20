@@ -63,6 +63,8 @@
     "yq"
     "zimfw"
     "zoxide"
+    "visitdata"
+    "kondo"
   ];
 
   casks = [
