@@ -63,7 +63,7 @@
     "yq"
     "zimfw"
     "zoxide"
-    "visitdata"
+    "visidata"
     "kondo"
   ];
 
