@@ -86,5 +86,6 @@
     "syncthing-app"
     "tabby"
     "thunderbird"
+    "tigervnc"
   ];
 }
