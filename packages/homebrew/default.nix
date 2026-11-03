@@ -65,6 +65,7 @@
     "zoxide"
     "visidata"
     "kondo"
+    "poppler"
   ];
 
   casks = [
@@ -87,5 +88,6 @@
     "tabby"
     "thunderbird"
     "tigervnc"
+    "libreoffice"
   ];
 }
