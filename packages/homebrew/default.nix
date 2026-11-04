@@ -66,6 +66,8 @@
     "visidata"
     "kondo"
     "poppler"
+    "qpdf"
+    "pdftk-java"
   ];
 
   casks = [
