@@ -22,6 +22,7 @@
     "fzf"
     "ghostscript"
     "gnupg"
+    "ripgrep-all"
     "helm"
     "herdr"
     "htop"
